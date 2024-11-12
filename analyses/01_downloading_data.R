@@ -14,3 +14,7 @@ download.file(url = url,
 # Unzip the DwC
 unzip(file.path(file_path, file_name),
       exdir = file_path)
+
+
+# Herbarium data from JABOT had to be downloaded manually from
+# https://furb.jbrj.gov.br -> Consultar -> Exportar -> CSV (Padrão)
