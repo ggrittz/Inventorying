@@ -1,9 +1,11 @@
 ---
 output: github_document
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(collapse  = TRUE,
@@ -12,115 +14,44 @@ knitr::opts_chunk$set(collapse  = TRUE,
                       out.width = "100%")
 ```
 
-
-
-Inventorying <img src="man/figures/compendium-sticker.png" align="right" style="float:right; height:120px;"/>
-=========================================================
+# Repository for XXX Inventorying paper
 
 <!-- badges: start -->
-[![License: GPL (>= 2)](https://img.shields.io/badge/License-GPL%20%28%3E%3D%202%29-blue.svg)](https://choosealicense.com/licenses/gpl-2.0/)
+
+[![License: GPL (\>=
+2)](https://img.shields.io/badge/License-GPL%20%28%3E%3D%202%29-blue.svg)](https://choosealicense.com/licenses/gpl-2.0/)
+
 <!-- badges: end -->
 
+### Description
 
+This is the Research Compendium of **XXX Inventorying XXX**. It contains
+the necessary codes to reproduce all analyses and plot images in the article. Scripts
+are numerically ordered, that is, the workflow starts with `01_downloading_data.R` and
+ends with `05_plotting_data.R`. There is a single internal function, `99_summInv.R`, that is loaded 
+with `devtools::load_all()` to summarise forest inventory data by vegetation type.
 
-<p align="left">
-  • <a href="#overview">Overview</a><br>
-  • <a href="#features">Features</a><br>
-  • <a href="#content">Content</a><br>
-  • <a href="#installation">Installation</a><br>
-  • <a href="#usage">Usage</a><br>
-  • <a href="#citation">Citation</a><br>
-  • <a href="#contributing">Contributing</a><br>
-  • <a href="#acknowledgments">Acknowledgments</a><br>
-  • <a href="#references">References</a>
-</p>
+<br />
 
+### Workflow
 
+Codes are structured as follows:
 
-## Overview
+1. **Downloading data**: the script `01_downloading_data.R` gets FURB herbarium occurrences from JBRJ IPT as a DarwinCore sheet. FURB herbarium data from JABOT, however, needs to be manually downloaded. Instructions are commented in the script. <br /> <br />
+2. **Preparing data**: the script `02_preparing_data.R` loads, edits, and cleans, and saves the data from both the
+forest and floristic inventory of FlorestaSC project. Script `03_preparing_lifeforms.R` extracts the register life form from a field called *projeto* in the JABOT spreadsheet. This is not a DwC standardized field, so it cannot be extracted directly from JBRJ IPT. See **Downloading data**. All steps for both scripts are thoroughly described within it, as comments. <br /> <br />
+3. **Summarizing data**: the script `04_summarizing_data.R` loads the previously saved data and performs all types of operations to sum up our results. <br /> <br />
+4. **Plotting data**: finally, the script `05_plotting_data.R` creates all the plots shown in the main article, plus a few extra summarizations.
 
-This research compendium... **{{ DESCRIBE YOUR PROJECT }}**
+<br />
 
+### How to cite
 
-
-## Features
-
-The main purpose of this compendium is to... **{{ DESCRIBE THE MAIN FEATURES }}**
-
-
-
-## Content
-
-This repository is structured as follow:
-
-- [`DESCRIPTION`](https://github.com/ggrittz/Inventorying/tree/master/DESCRIPTION):
-contains project metadata (authors, date, dependencies, etc.)
-
-- [`make.R`](https://github.com/ggrittz/Inventorying/tree/master/make.R):
-main R script to run the entire project
-
-- [`R/`](https://github.com/ggrittz/Inventorying/tree/master/R):
-contains R functions developed especially for this project
-
-- **{{ LIST ADDITIONAL FILES/FOLDER }}**
-
-
-
-## Installation
-
-To install this compendium:
-
-- [Fork](https://docs.github.com/en/get-started/quickstart/contributing-to-projects) 
-this repository using the GitHub interface.
-- [Clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) 
-your fork using `git clone fork-url` (replace `fork-url` by the URL of your fork). 
-Alternatively, open [RStudio IDE](https://posit.co/products/open-source/rstudio/) 
-and create a New Project from Version Control.
-
-
-
-## Usage
-
-Launch the [`make.R`](https://github.com/ggrittz/Inventorying/tree/master/make.R)
-file with:
-
-```{r eval=FALSE}
-source("make.R")
-```
-
-**Notes**
-
-- All required packages listed in the `DESCRIPTION` file will be installed (if necessary)
-- All required packages and R functions will be loaded
-- Some analyses listed in the `make.R` might take time
-
-
-
-## Citation
-
-Please use the following citation: 
+Please cite this GiHub as:
 
 > **{{ ADD A CITATION }}**
 
+<br />
 
+### References
 
-## Contributing
-
-All types of contributions are encouraged and valued. For more information, 
-check out our [Contributor Guidelines](https://github.com/ggrittz/Inventorying/blob/main/CONTRIBUTING.md).
-
-Please note that this project is released with a 
-[Contributor Code of Conduct](https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html). 
-By contributing to this project, you agree to abide by its terms.
-
-
-
-## Acknowledgments
-
-**{{ OPTIONAL SECTION }}**
-
-
-
-## References
-
-**{{ OPTIONAL SECTION }}**

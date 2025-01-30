@@ -104,23 +104,25 @@ herb$dayIdentified <- date_split[, 1]
 herb$monthIdentified <- date_split[, 2]
 herb$yearIdentified <- date_split[, 3]
 
-# formatDwc
+# Formatting DwC data in a data.frame to be used inside plantR
 herb <- plantR::formatDwc(splink_data = herb,
                           drop = TRUE)
 
-# formatOcc
+# Format collector and determiner names, numbers, dates, and collection codes
 herb1 <- plantR::formatOcc(herb)
-# formatLoc
+# Standardizes names of administrative levels from species occurrences
 herb1 <- plantR::formatLoc(herb1)
-# formatCoord
+# Formats geographical coordinates to decimal degrees and replaces missing
+# coordinates by the coordinates obtained from the gazetteer
 herb1 <- plantR::formatCoord(herb1)
-# formatTax
+# Edits and standardizes the names of plant species and families
 herb1 <- plantR::formatTax(tax = herb1,
                            db = "bfo",
                            split.letters = TRUE,
                            parallel = TRUE,
                            cores = 8)
-# validateLoc
+# Compares the resolution of the locality information provided in the original
+# record with the resolution retrieved from the gazetteer
 herb1 <- plantR::validateLoc(herb1)
 
 # Objects needed to validateCoord
@@ -131,29 +133,18 @@ landBuff <- plantR::landBuff
 shoreLines <- plantR::shoreLines
 islandBuff <- plantR::islandsBuff
 
-# validateCoord
+# Cross-check the coordinates and check for cases where it falls near the sea
+# shore, open sea, and country boundaries. It tests for swapped/inverted coordinates,
+# searches for cultivated individuals, and finally detects spatial outliers.
 herb1 <- plantR::validateCoord(herb1)
 
-# validateTax
+# Assign a confidence level to the identification of species based on the name of
+# the person who provided the identification
 herb1 <- plantR::validateTax(herb1)
 
-# validateDup
+# Searches for duplicates and homogenize the information, leaving only one occurrence
+# for each group of duplicate.
 herb1 <- plantR::validateDup(herb1) # no duplicates in the data per se
-
-
-##### USING JABOT DATA TO GENERATE THIS STEP #####
-# Which registers came from IFFSC?
-# herb1$is_iffsc <- grepl("IFFSC", herb1$occurrenceRemarks)
-# # From the TRUE ones, how much of them are from the floristic inventory?
-# herb1$is_floristic <- FALSE
-# 
-# # Defining the classes #### CHECK GASPER IF ANY IS MISSING ####
-# classes <- c("Herbácea", "Coleta Extra", "Florística", "Epífita")
-# 
-# # Filter rows where `is_iffsc == TRUE` and check for the presence of classes
-# herb1$is_floristic[herb1$is_iffsc == TRUE] <- grepl(paste(classes, 
-#                                                           collapse = "|"), 
-#                                                     herb1$occurrenceRemarks[herb1$is_iffsc == TRUE])
 
 # Some minor class changes
 herb1$decimalLatitude.new1 <- as.numeric(herb1$decimalLatitude.new1)
