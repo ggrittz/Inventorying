@@ -246,6 +246,27 @@ summarizedTable <- data.frame(
                                                                  summ_flor$FT %in% "FED"])
 )
 
+# Add the family to the spreadsheet
+# From herbarium data
+summarizedTable <- dplyr::left_join(summarizedTable,
+                                    herb_data[, c("scientificNameFull",
+                                                  "family.new1")],
+                                    by = c("species" = "scientificNameFull"),
+                                    multiple = "first")
+# From inventory data
+get_these <- dplyr::left_join(summarizedTable[is.na(summarizedTable$family.new1), ],
+                              all_data[, c("spp.author", "family")],
+                              by = c("species" = "spp.author"),
+                              multiple = "first")
+get_these$family.new1 <- get_these$family
+get_these <- get_these[, -which(names(get_these) == "family")]
+
+# Merge both and reorder stuff
+summarizedTable <- rbind.data.frame(summarizedTable, get_these)
+summarizedTable <- summarizedTable[order(summarizedTable$species), ]
+names(summarizedTable)[which(names(summarizedTable) == "family.new1")] <- "family"
+summarizedTable <- summarizedTable[, c(length(summarizedTable), 1:(length(summarizedTable) -1 ))]
+
 # There are 6122 species of Tracheophyta in Santa Catarina (FBO 21/01/2025)
 # The FlorestaSC project alone collected...
 length(summarizedTable$species) / 6122
