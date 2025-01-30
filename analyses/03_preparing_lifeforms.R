@@ -1,5 +1,4 @@
 
-
 # Preparing life forms ----------------------------------------------------
 
 # Loading
@@ -23,14 +22,15 @@ plot_data$UA <- as.character(plot_data$UA)
 cols <- c("catalogNumber", "eventDate", "year", "month", "day",
           "yearIdentified", "monthIdentified", "dayIdentified",
           "dateIdentified", "decimalLongitude.new1", "decimalLatitude.new1",
-          "geo.check1", "taxon.rank", "scientificNameStatus", "suggestedName",
-          "suggestedAuthorship", "scientificNameFull", "family.new1", "genus")
+          "stateProvince.new", "geo.check1", "taxon.rank", "scientificNameStatus", 
+          "suggestedName", "suggestedAuthorship", "scientificNameFull", 
+          "family.new1", "genus")
 herb_data1 <- herb_data[, cols]
 
 # Edit JABOT life forms to merge with FURB herbarium
 lifeform <- jabot_data[, c("codbarras", "projeto")]
 
-# Removing NA
+# Removing empty
 lifeform[lifeform == ""] <- NA
 
 # Prepare the column
@@ -47,6 +47,8 @@ lifeform$is_iffsc <- TRUE
 lifeform$cycle <- sapply(strsplit(lifeform$projeto.edited, split = "\\/"), function(x) x[1])
 # This is the sample unit
 lifeform$sample.unit <- sapply(strsplit(lifeform$projeto.edited, split = "\\/"), function(x) x[2])
+lifeform$sample.unit <- gsub("^[a-zA-Z]?([0-9]+)[a-zA-Z]?$", "\\1", lifeform$sample.unit)
+
 # This is the potential source/lifeform column
 lifeform$projeto.edited.new1 <- sapply(strsplit(lifeform$projeto.edited, split = "\\/"), function(x) x[3])
 lifeform$projeto.edited.new1 <- gsub("^(\\S+).*", "\\1", lifeform$projeto.edited.new1)
@@ -94,7 +96,7 @@ lifeform$has_lifeform2 <- sapply(1:nrow(lifeform), function(i) {
 
 # Populate a new column with the info for the register: does it have a lifeform?
 lifeform$has_lifeform <- lifeform$has_lifeform1 | lifeform$has_lifeform2
-table(lifeform$has_lifeform) # 26,565 life forms available
+table(lifeform$has_lifeform) # 26,589 life forms available
 
 # Substitute new life forms names to standardize
 
@@ -107,9 +109,9 @@ lifeform$projeto.edited.new2 <- lookup_vec[match(lifeform$projeto.edited.new2, n
 
 # Any cases of double life form for the same register?
 problems = lifeform[!is.na(lifeform$projeto.edited.new1) & 
-                      !is.na(lifeform$projeto.edited.new2), ] # yes
+                      !is.na(lifeform$projeto.edited.new2), ] # no
 
-# Manually solve these cases by looking at the original informatio
+# Manually solve these cases by looking at the original information
 # Solution: keep $projeto.edited.new1 life form
 
 # Populate final column
@@ -124,6 +126,13 @@ names(lifeform)[which(names(lifeform) == "RF reduzido")] <- "FT"
 
 # Considering Restinga to be FOD
 lifeform$FT <- gsub("Restinga", "FOD", lifeform$FT)
+
+# Getting phytoregion information for plot 9997 from Santa Catarina map #
+# file_name4 <- "Klein_3classes.shp"
+# missing_phyto <- lifeform[lifeform$sample.unit %in% "9997", ]
+# 
+# klein_map <- terra::vect(file.path(file_path2, file_name4))
+
 
 # Renaming columns and elements before merging with herbarium data
 colnames(lifeform)[which(colnames(lifeform) == "sample.unit")] <- "plot"

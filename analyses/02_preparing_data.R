@@ -26,7 +26,7 @@ all_data <- list(cycle_one_arb,
 
 # Overall edits
 
-# Necessary columns
+# Necessary columns only
 cols <- c("plot", "FT", "date", "lat dec", 
           "long dec", "family", "spp", "spp.author", "source")
 for(i in seq_along(all_data)){
@@ -49,7 +49,6 @@ all_data <- all_data[!grepl("morta", all_data$family, ignore.case = TRUE) &
 all_data$FT <- gsub("RES", "FOD", all_data$FT)
 # table(all_data$FT)
 
-
 #### Match these names against the BFO ####
 # These can be matched using only the canonical name since all of them are unique
 all_data1 <- unique(all_data$spp.author)
@@ -57,7 +56,7 @@ all_data1 <- plantR::fixAuthors(all_data1)
 all_data1 <- all_data1[!is.na(all_data1$tax.author), ]
 all_data1 <- plantR::prepSpecies(x = all_data1,
                                  tax.names = c("tax.name", "tax.author"),
-                                 use.authors = FALSE,
+                                 use.authors = TRUE,
                                  db = "bfo",
                                  sug.dist = 0.9)
 
@@ -72,14 +71,12 @@ all_data$genus <- gsub("^([A-Za-z]+).*",
                        all_data$spp.author)
 # table(all_data$genus)
 
-
 #### 2. Preparing herbarium data ####
 file_name5 <- "occurrence.txt"
 herb <- data.table::fread(file.path(file_path, file_name5))
 herb <- as.data.frame(herb)
 
 # Preparing columns dayIdentified, monthIdentfied, yearIdentified
-
 split_date <- function(x) {
   parts <- unlist(strsplit(x, "/"))
   
@@ -143,8 +140,6 @@ herb1 <- plantR::validateTax(herb1)
 # validateDup
 herb1 <- plantR::validateDup(herb1) # no duplicates in the data per se
 
-# Removing data from outside of SC state
-herb1 <- herb1[herb1$stateProvince.new %in% "santa catarina", ]
 
 ##### USING JABOT DATA TO GENERATE THIS STEP #####
 # Which registers came from IFFSC?

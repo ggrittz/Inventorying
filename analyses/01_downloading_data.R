@@ -2,7 +2,7 @@
 
 file_path <- here::here("data", "raw-data")
 link <- "https://ipt.jbrj.gov.br/jabot/archive.do?r=furb&v="
-version <- "1.54" # Publication date: 01 October 2024
+version <- "1.58" # Publication date: 2024-12-01
 url <- paste0(link, version)
 
 # Name to save
@@ -17,4 +17,4 @@ unzip(file.path(file_path, file_name),
 
 
 # Herbarium data from JABOT had to be downloaded manually from
-# https://furb.jbrj.gov.br -> Consultar -> Exportar -> CSV (Padrão)
+# https://furb.jbrj.gov.br -> Consultar (you have to be logged in) -> Exportar -> CSV (Padrão)
