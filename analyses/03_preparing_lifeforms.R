@@ -12,6 +12,11 @@ file_path1 <- here::here("data", "raw-data")
 file_name1 <- "furb_herbaria_jabot.csv"
 jabot_data <- read.csv(file.path(file_path1, file_name1), sep = ";")
 
+
+##### CHECK HERE: there are two species which are being considered floristic
+##### but are not
+
+
 # Get plot vegetation type from the sample unit in the end
 file_path2 <- here::here("data", "raw-data")
 file_name2 <- "UAs_IFFSC.xlsx"
@@ -21,10 +26,12 @@ plot_data$UA <- as.character(plot_data$UA)
 # Filter only the necessary herbarium data columns
 cols <- c("catalogNumber", "eventDate", "year", "month", "day",
           "yearIdentified", "monthIdentified", "dayIdentified",
-          "dateIdentified", "decimalLongitude.new1", "decimalLatitude.new1",
-          "stateProvince.new", "geo.check1", "taxon.rank", "scientificNameStatus", 
+          "dateIdentified", "decimalLatitude.new", "decimalLongitude.new",
+          "stateProvince.new", "taxon.rank", "scientificNameStatus", 
           "suggestedName", "suggestedAuthorship", "scientificNameFull", 
-          "family.new1", "genus")
+          "family.new", "genus")
+
+# "geo.check1" "decimalLongitude.new1", "decimalLatitude.new1" "family.new"
 herb_data1 <- herb_data[, cols]
 
 # Edit JABOT life forms to merge with FURB herbarium
@@ -96,7 +103,7 @@ lifeform$has_lifeform2 <- sapply(1:nrow(lifeform), function(i) {
 
 # Populate a new column with the info for the register: does it have a lifeform?
 lifeform$has_lifeform <- lifeform$has_lifeform1 | lifeform$has_lifeform2
-table(lifeform$has_lifeform) # 26,589 life forms available
+table(lifeform$has_lifeform) # 26,603 life forms available
 
 # Substitute new life forms names to standardize
 

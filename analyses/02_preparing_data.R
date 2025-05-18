@@ -36,6 +36,19 @@ for(i in seq_along(all_data)){
 # Back to data.frame for easier manipulation
 all_data <- do.call(rbind.data.frame, all_data)
 
+# Names that need to be removed from inventory data
+to_remove <- c("Athenaea pogogena",
+               "Cinnamodendron axillare",
+               "Dendropanax cuneatus",
+               "Schinus polygama",
+               "Mollinedia widgrenii",
+               "Cyclolobium brasiliense",
+               "Phytolacca thyrsiflora",
+               "Inga barbata",
+               "Mollinedia engleriana",
+               "Zanthoxylum caribaeum")
+all_data <- all_data[!all_data$spp %in% to_remove, ]
+
 # Renaming two columns
 colnames(all_data)[which(colnames(all_data) == "lat dec")] <- "lat"
 colnames(all_data)[which(colnames(all_data) == "long dec")] <- "long"
@@ -54,10 +67,16 @@ all_data$FT <- gsub("RES", "FOD", all_data$FT)
 all_data1 <- unique(all_data$spp.author)
 all_data1 <- plantR::fixAuthors(all_data1)
 all_data1 <- all_data1[!is.na(all_data1$tax.author), ]
+
+# Renaming columns for prepSpecies 
+names(all_data1)[which(names(all_data1) == "tax.name")] <- "scientificName"
+names(all_data1)[which(names(all_data1) == "tax.author")] <- "scientificNameAuthorship"
+
 all_data1 <- plantR::prepSpecies(x = all_data1,
-                                 tax.names = c("tax.name", "tax.author"),
-                                 use.authors = TRUE,
+                                 tax.names = c("scientificName", 
+                                               "scientificNameAuthorship"),
                                  db = "bfo",
+                                 use.authors = TRUE,
                                  sug.dist = 0.9)
 
 all_data <- dplyr::left_join(all_data, all_data1[, c("orig.name", "scientificNameFull")],
@@ -71,7 +90,23 @@ all_data$genus <- gsub("^([A-Za-z]+).*",
                        all_data$spp.author)
 # table(all_data$genus)
 
-#### 2. Preparing herbarium data ####
+# Names that need to be changed after name-matching with Flora
+names_path <- here::here("data", "raw-data")
+names_name <- "names_to_fix.csv"
+to_fix <- read.csv(file.path(names_path, names_name), sep = ';', fileEncoding = "UTF-8")
+to_fix$Nome_novo <- gsub("Ã¼", "ü", to_fix$Nome_novo, fixed = TRUE)
+pattern <- to_fix$Nome_atual
+replacement <- to_fix$Nome_novo
+
+for(i in 1:nrow(to_fix)){
+  all_data$spp.author <- gsub(pattern[i], 
+                              replacement[i], 
+                              all_data$spp.author, 
+                              fixed = TRUE)
+}
+
+
+#### 2. Preparing herbarium data #### IPT data
 file_name5 <- "occurrence.txt"
 herb <- data.table::fread(file.path(file_path, file_name5))
 herb <- as.data.frame(herb)
@@ -115,40 +150,58 @@ herb1 <- plantR::formatLoc(herb1)
 # Formats geographical coordinates to decimal degrees and replaces missing
 # coordinates by the coordinates obtained from the gazetteer
 herb1 <- plantR::formatCoord(herb1)
-# Edits and standardizes the names of plant species and families
-herb1 <- plantR::formatTax(tax = herb1,
+# Edits and standardizes the names of plant species
+herb1 <- plantR::formatTax(herb1,
+                           tax.names = c("scientificName", 
+                                         "scientificNameAuthorship"),
                            db = "bfo",
-                           split.letters = TRUE,
-                           parallel = TRUE,
-                           cores = 8)
-# Compares the resolution of the locality information provided in the original
-# record with the resolution retrieved from the gazetteer
-herb1 <- plantR::validateLoc(herb1)
+                           use.authors = TRUE,
+                           sug.dist = 0.9)
 
-# Objects needed to validateCoord
-worldMap <- plantR::worldMap
-world <- plantR::world
-latamMap <- plantR::latamMap
-landBuff <- plantR::landBuff
-shoreLines <- plantR::shoreLines
-islandBuff <- plantR::islandsBuff
+# Fixing names here too
+pattern1 <- c("Eugenia suberosa Cambess.", "Myrcia ilheosensis Kiaersk.")
+replacement1 <- c("Eugenia verticillata (Vell.) Angely", "Myrcia florida Lem.")
+to_fix2 <- data.frame(Nome_atual = pattern1,
+                      Nome_novo = replacement1)
+to_fix <- rbind(to_fix, to_fix2)
+pattern <- to_fix$Nome_atual
+replacement <- to_fix$Nome_novo
 
-# Cross-check the coordinates and check for cases where it falls near the sea
-# shore, open sea, and country boundaries. It tests for swapped/inverted coordinates,
-# searches for cultivated individuals, and finally detects spatial outliers.
-herb1 <- plantR::validateCoord(herb1)
+for(i in 1:length(pattern)){
+  herb1$scientificNameFull <- gsub(pattern[i],
+                                   replacement[i], 
+                                   herb1$scientificNameFull,
+                                   fixed = TRUE)
+}
 
-# Assign a confidence level to the identification of species based on the name of
-# the person who provided the identification
-herb1 <- plantR::validateTax(herb1)
-
-# Searches for duplicates and homogenize the information, leaving only one occurrence
-# for each group of duplicate.
-herb1 <- plantR::validateDup(herb1) # no duplicates in the data per se
+# # Compares the resolution of the locality information provided in the original
+# # record with the resolution retrieved from the gazetteer
+# herb1 <- plantR::validateLoc(herb1)
+# 
+# # Objects needed to validateCoord
+# worldMap <- plantR::worldMap
+# world <- plantR::world
+# latamMap <- plantR::latamMap
+# landBuff <- plantR::landBuff
+# shoreLines <- plantR::shoreLines
+# islandBuff <- plantR::islandsBuff
+# 
+# # Cross-check the coordinates and check for cases where it falls near the sea
+# # shore, open sea, and country boundaries. It tests for swapped/inverted coordinates,
+# # searches for cultivated individuals, and finally detects spatial outliers.
+# herb1 <- plantR::validateCoord(herb1)
+# 
+# # Assign a confidence level to the identification of species based on the name of
+# # the person who provided the identification
+# herb1 <- plantR::validateTax(herb1)
+# 
+# # Searches for duplicates and homogenize the information, leaving only one occurrence
+# # for each group of duplicate.
+# herb1 <- plantR::validateDup(herb1) # no duplicates in the data per se
 
 # Some minor class changes
-herb1$decimalLatitude.new1 <- as.numeric(herb1$decimalLatitude.new1)
-herb1$decimalLongitude.new1 <- as.numeric(herb1$decimalLongitude.new1)
+# herb1$decimalLatitude.new1 <- as.numeric(herb1$decimalLatitude.new1)
+# herb1$decimalLongitude.new1 <- as.numeric(herb1$decimalLongitude.new1)
 herb1$yearIdentified <- as.integer(herb1$yearIdentified)
 herb1$monthIdentified <- as.integer(herb1$monthIdentified)
 herb1$dayIdentified <- as.integer(herb1$dayIdentified)
@@ -157,16 +210,15 @@ herb1$eventDate <- as.Date(herb1$eventDate)
 # Creating the column 'genus' for herbarium data
 herb1$genus <- gsub("^([A-Za-z]+).*",
                     "\\1",
-                    herb1$suggestedName)
+                    herb1$scientificNameFull)
 
 # Removing Fungi and algae
 library(WorldFlora)
 data(vascular.families)
-herb1 <- herb1[tolower(herb1$family.new1) %in% tolower(vascular.families$Family), ]
+herb1 <- herb1[tolower(herb1$family.new) %in% tolower(vascular.families$Family), ]
 
 # Adjusting family.new1 column to be title-mode
-herb1$family.new1 <- stringr::str_to_title(herb1$family.new1)
-
+herb1$family.new <- stringr::str_to_title(herb1$family.new)
 
 #### Save everything ####
 file_path1 <- here::here("data", "derived-data")
@@ -174,7 +226,6 @@ file_name6 <- "all_data.rds"
 file_name7 <- "herb_data.rds"
 saveRDS(all_data, file.path(file_path1, file_name6))
 saveRDS(herb1, file.path(file_path1, file_name7))
-
 rm(list=ls())
 
 

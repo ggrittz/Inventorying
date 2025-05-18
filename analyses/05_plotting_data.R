@@ -1,20 +1,30 @@
 
 
 # Plotting data -----------------------------------------------------------
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+library(gridExtra)
+library(grid)
+library(VennDiagram)
 
 # Read necessary data
 file_path <- here::here("data", "derived-data")
+file_path1 <- here::here("outputs")
 file_name1 <- "inv_spp1.rds"
 file_name2 <- "inv_spp2.rds" 
 file_name3 <- "flor_spp1.rds" 
 file_name4 <- "flor_spp2.rds" 
 file_name5 <- "herb_data_lifeforms.rds"
+file_name6 <- "summary_table.xlsx"
 
 inventory_spp1 <- readRDS(file.path(file_path, file_name1))
 inventory_spp2 <- readRDS(file.path(file_path, file_name2))
 floristic_spp1 <- readRDS(file.path(file_path, file_name3))
 floristic_spp2 <- readRDS(file.path(file_path, file_name4))
 herb_data <- readRDS(file.path(file_path, file_name5))
+summ_table <- readxl::read_xlsx(file.path(file_path1, file_name6))
+
 
 # Pie chart for life forms ------------------------------------------------
 to_pie <- data.frame(table(herb_data$lifeForm[herb_data$is_floristic %in% TRUE]))
@@ -41,34 +51,119 @@ pie(to_pie$Freq, labels = labels,
 
 dev.off()
 
+# Venn Diagram for ecoregions ---------------------------------------------
+summ_table_filtered <- summ_table %>% 
+  select(species, matches("_(FOM|FOD|FED)\\d*$"))
+names(summ_table_filtered) <- gsub("(FOM|FOD|FED)\\d*$", "\\1", 
+                                   names(summ_table_filtered))
 
-# Venn Diagram ------------------------------------------------------------
-VennDiagram::venn.diagram(x = list(unique(c(inventory_spp1, inventory_spp2)),
-                                   unique(c(floristic_spp1, floristic_spp2))),
-                          disable.logging = TRUE,
-                          category.names = c(
-                            paste0("Forest Inventory", " (", length(unique(c(inventory_spp1, inventory_spp2))), ")"),
-                            paste0("Floristic Inventory", " (", length(unique(c(floristic_spp1, floristic_spp2))), ")")),
-                          filename = "figures/venn.svg",
-                          print.mode = c("raw", "percent"),
-                          imagetype = "svg",
-                          na = "remove",
-                          fontfamily = "sans",
-                          cat.fontfamily = "sans",
-                          main.fontfamily = "sans",
-                          height = 10,
-                          width = 10,
-                          units = "in",
-                          cex = 2,
-                          cat.cex = 2.5,
-                          lwd = 1.5,
-                          alpha = 0.75,
-                          margin = 0.075,
-                          cat.pos = c(180, 180),
-                          # cat.dist = c(0.075, 0.075, 0.025),
-                          col = "black",
-                          fill = c("#BDD7E7", "#6BAED6"))
+result <- summ_table_filtered %>% 
+  pivot_longer(
+    cols = -species,
+    names_to = "source",
+    values_to = "present"
+  ) %>%
+  filter(present) %>%  # Keep only rows where present = TRUE
+  mutate(er = gsub(".*_(FOM|FOD|FED)$", "\\1", source)) %>%  # Extract FOM/FOD/FED
+  select(species, er)  # Keep only these two columns
+result <- result[!duplicated(result), ]
 
+# Split species by their er type
+FOM_spp <- unique(result$species[result$er == "FOM"])
+FOD_spp <- unique(result$species[result$er == "FOD"])
+FED_spp <- unique(result$species[result$er == "FED"])
+
+
+# Custom function to create Venn grobs with your exact parameters
+create_venn_grob <- function(venn_list, is_3way = TRUE) {
+  grid.newpage()
+  
+  if (is_3way) {
+    # Parameters for FOM/FOD/FED Venn (3-way)
+    venn_grob <- venn.diagram(
+      x = venn_list,
+      filename = NULL,
+      disable.logging = TRUE,
+      category.names = names(venn_list),
+      print.mode = c("raw", "percent"),
+      imagetype = "none",
+      fontfamily = "sans",
+      cat.fontfamily = "sans",
+      main.fontfamily = "sans",
+      height = 10,
+      width = 10,
+      units = "in",
+      cex = 2,
+      cat.cex = 2.5,
+      lwd = 1.5,
+      alpha = 0.75,
+      margin = 0.075,
+      cat.dist = c(0.075, 0.075, 0.05),
+      cat.pos = c(330, 30, 180),
+      col = "black",
+      fill = c("#BDD7E7", "#6BAED6", "#3182BD")
+    )
+  } else {
+    # Parameters for Forest/Floristic Venn (2-way)
+    venn_grob <- venn.diagram(
+      x = venn_list,
+      filename = NULL,
+      disable.logging = TRUE,
+      category.names = names(venn_list),
+      print.mode = c("raw", "percent"),
+      imagetype = "none",
+      fontfamily = "sans",
+      cat.fontfamily = "sans",
+      main.fontfamily = "sans",
+      height = 10,
+      width = 10,
+      units = "in",
+      cex = 2,
+      cat.cex = 2.5,
+      lwd = 1.5,
+      alpha = 0.75,
+      margin = 0.075,
+      cat.pos = c(180, 180),
+      col = "black",
+      fill = c("#BDD7E7", "#6BAED6")
+    )
+  }
+  
+  grid.draw(venn_grob)
+  grid.grab()
+}
+
+# Create grobs with your exact parameters
+grob_er <- create_venn_grob(
+  list(
+    "Amf" = FOM_spp,
+    "SMcf" = FOD_spp,
+    "APAf" = FED_spp
+  ),
+  is_3way = TRUE
+)
+
+grob_inv_flor <- create_venn_grob(
+  list(
+    "Forest Inventory" = unique(c(inventory_spp1, inventory_spp2)),
+    "Floristic Inventory" = unique(c(floristic_spp1, floristic_spp2))
+  ),
+  is_3way = FALSE
+)
+
+# Combine side-by-side with labels
+combined <- grid.arrange(
+  grob_er,
+  grob_inv_flor,
+  ncol = 2
+)
+
+# Save
+ggsave("figures/combined_venn.svg", 
+       combined, 
+       width = 20, 
+       height = 10, 
+       units = "in")
 
 
 # Species increment through Floristic Inventory ---------------------------
@@ -107,7 +202,7 @@ to_plot_all <- to_plot_all[!is.na(to_plot_all$eventDate), ]
 # The exclusive contribution of FlorestaSC floristic inventory to the number of SC species
 length(setdiff(unique(to_plot_all$scientificNameFull[to_plot_all$is_floristic %in% TRUE]),
                unique(to_plot_all$scientificNameFull[to_plot_all$is_floristic %in% c(FALSE, NA)])))
-# 345 species, or 8% of the 4191 SC species in FURB
+# 328 species, or 7% of the 4389 SC species in FURB
 
 
 # Get unique species over the years for all records
@@ -213,12 +308,12 @@ combined_plot <- ggplot() +
   )
 
 combined_plot
-ggplot2::ggsave(filename = "cumrich1.png",
+ggplot2::ggsave(filename = "cumrich.svg",
                 plot = combined_plot,
                 path = here::here("figures"),
                 height = 8,
                 width = 10,
-                device = "png")
+                device = "svg")
 
 
 
@@ -227,7 +322,7 @@ herb_flor <- herb_data[herb_data$is_floristic %in% TRUE, ]
 herb_flor1 <- herb_flor
 
 # How many registers were not identified yet?
-table(herb_flor$scientificNameStatus) # 2602 + families indet
+table(herb_flor$scientificNameStatus) # 2591 at genus- and 432 at family-level: 3,023
 
 
 # Adjusting for some cases...
@@ -238,7 +333,7 @@ herb_flor1$dateIdentified <- ifelse(
   as.character(herb_flor1$dateIdentified)  # Manter como character
 )
 
-sum(is.na(herb_flor1$dateIdentified))
+sum(is.na(herb_flor1$dateIdentified)) # 425 sem data de ID
 
 
 # setdiff(unique(a$family.new1), 
@@ -254,7 +349,7 @@ herb_flor1$monthIdentified_new <- sapply(strsplit(herb_flor1$dateIdentified, "-"
 herb_flor1 <- herb_flor1[!is.na(herb_flor1$monthIdentified_new) &
                            !is.na(herb_flor1$yearIdentified_new) &
                            !grepl("NA", herb_flor1$monthIdentified_new), ]
-# Now we have 26874
+# From 27883 now we have 27,100 
 
 # Make new columns but now only with months
 herb_flor1$dateIdentified_new <- as.Date(paste(herb_flor1$yearIdentified_new,
@@ -266,12 +361,12 @@ herb_flor1$eventDate_new <- as.Date(paste(herb_flor1$year,
                                           "01",
                                           sep = "-"))
 
-# 10010 registers identified at the same month at the colection
+# From 27883 now we have 27,100 minus the 10,003 registers below
+# 10,003 registers identified at the same month at the colection
 (table(herb_flor1$eventDate_new == herb_flor1$dateIdentified_new)[2])
-
 # Removing these since they were identified at the same day (most likely)
 herb_flor1 <- herb_flor1[!(herb_flor1$eventDate_new == herb_flor1$dateIdentified_new), ]
-
+# We are left with 17,097 registers for time-to-id analyses
 
 # Diff time between these posterior identifications
 herb_flor1$diff <- as.integer(difftime(time1 = herb_flor1$dateIdentified_new,
@@ -284,12 +379,12 @@ herb_flor1 <- herb_flor1[herb_flor1$diff > 0, ]
 mean(herb_flor1$diff) # 1.91 years
 median(herb_flor1$diff) # 0.41 years
 
-# How about the top 5 most abundant families?
-fam_count <- sort(table(herb_flor1$family.new1), decreasing = TRUE)
+# How about the top 10 most abundant families?
+fam_count <- sort(table(herb_flor1$family.new), decreasing = TRUE)
 top5_fam <- names(fam_count)[1:10]
 
-# Filter the original dataframe to include only the top 10 species
-herb_flor2 <- herb_flor1[herb_flor1$family.new1 %in% top5_fam, ]
+# Filter the original dataframe to include only the top 10 families
+herb_flor2 <- herb_flor1[herb_flor1$family.new %in% top5_fam, ]
 
 # Custom palette
 my_palette <- c("#9EDAE5", "#FFBB78", "#C5B0D5", "#FF9898", "#C49C94",
@@ -297,7 +392,7 @@ my_palette <- c("#9EDAE5", "#FFBB78", "#C5B0D5", "#FF9898", "#C49C94",
 
 # Plot the top 10
 ggplot(herb_flor2, 
-       aes(x = forcats::fct_rev(family.new1), y = diff, fill = family.new1)) +
+       aes(x = forcats::fct_rev(family.new), y = diff, fill = family.new)) +
   geom_boxplot() +
   coord_flip() + 
   theme_bw(base_size = 14) +
@@ -307,15 +402,17 @@ ggplot(herb_flor2,
   scale_fill_manual(values = my_palette) +
   guides(fill = 'none')
 
-ggsave("Figure1.svg", device = "svg", path = file_path,
+ggsave(filename = "id_time.svg", device = "svg", path = here::here("figures"),
        width = 8, height = 6)
 
 #Values
-a = aggregate(diff ~ family.new1,
+a = aggregate(diff ~ family.new,
               data = herb_flor2,
               FUN = function(x) c(mean = round(mean(x), 2), 
                                   sd = round(sd(x), 2),
+                                  max = round(max(x), 2),
                                   n = length(x)))
+print(a)
 
 file_path2 <- here::here("data", "derived-data")
 file_name5 <- "abund_fam_table.csv"
@@ -324,7 +421,6 @@ write.csv(a, file.path(file_path2, file_name5))
 
 # How many species that were posteriorly identified configure new species to
 # floristic inventory?
-
 post_id_spp <- unique(herb_flor1$scientificNameFull[herb_flor1$taxon.rank %in% c("species",
                                                                              "subspecies",
                                                                              "variety")])
@@ -333,19 +429,16 @@ pre_id_spp <- unique(herb_flor$scientificNameFull[herb_flor$taxon.rank %in% c("s
                                                                               "subspecies",
                                                                               "variety") &
                                                     !(herb_flor$catalogNumber %in% herb_flor1$catalogNumber)])
-length(setdiff(post_id_spp, pre_id_spp)) # 1380 species/subspecies/varieties
+length(setdiff(post_id_spp, pre_id_spp)) # 1346 species/subspecies/varieties
 
 # Genus? ------------------------------------------------------------------
-
 post_id_gen <- unique(herb_flor1$genus)
 pre_id_gen <- unique(herb_flor$genus[!(herb_flor$catalogNumber %in% herb_flor1$catalogNumber)])
-length(setdiff(post_id_gen, pre_id_gen)) # 179 genus
+length(setdiff(post_id_gen, pre_id_gen)) # 226 genus
 
 # Families? ---------------------------------------------------------------
-post_id_fam <- unique(herb_flor1$family.new1)
-pre_id_fam <- unique(herb_flor$family.new1[!(herb_flor$catalogNumber %in% herb_flor1$catalogNumber)])
-length(setdiff(post_id_fam, pre_id_fam)) # 14 families
-
-
-
+post_id_fam <- unique(herb_flor1$family.new)
+pre_id_fam <- unique(herb_flor$family.new[!(herb_flor$catalogNumber %in% herb_flor1$catalogNumber)])
+length(setdiff(post_id_fam, pre_id_fam)) # 21 families
+rm(list=ls())
 
