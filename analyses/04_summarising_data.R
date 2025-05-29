@@ -4,6 +4,10 @@
 # For internals
 devtools::load_all()
 
+# From WorldFlora
+library(WorldFlora)
+data("vascular.families")
+
 # Loading data
 file_path <- here::here("data", "derived-data")
 file_name1 <- "all_data.rds" # inventory plus reg, both cycles
@@ -253,6 +257,12 @@ summarizedTable$genus <- gsub("^([A-Za-z]+).*",
                               "\\1",
                               summarizedTable$species)
 summarizedTable$family <- plantR::getFamily(summarizedTable$genus)
+
+# Get higher category from WorldFlora
+summarizedTable <- dplyr::left_join(summarizedTable,
+                                    vascular.families[, c("Group", "Family")],
+                                    by = c("family" = "Family"))
+
 # # From herbarium data
 # summarizedTable <- dplyr::left_join(summarizedTable,
 #                                     herb_data[, c("scientificNameFull",
@@ -436,8 +446,6 @@ families <- families[families$taxon.rank %in% c("subspecies",
                                                 "species",
                                                 "variety") &
                        families$is_floristic %in% TRUE, ]
-library(WorldFlora)
-data("vascular.families")
 
 families <- dplyr::left_join(families, vascular.families[, c("Group", "Family")],
                              by = c("family.new" = "Family"))

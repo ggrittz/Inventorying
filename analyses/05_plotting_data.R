@@ -43,7 +43,7 @@ svg("figures/pie_chart.svg", width = 10, height = 8)  # Adjust the dimensions as
 colors <- RColorBrewer::brewer.pal(n = length(to_pie$Var1), name = "Blues")
 
 pie(to_pie$Freq, labels = labels, 
-    main = paste0("Growth forms represented in the Floristic Inventory samples", 
+    main = paste0("Growth forms represented in the Floristic survey samples", 
                  "\n", 
                  "(", "N", " = ", sum(to_pie$Freq), ")"),
     col = colors,
@@ -145,8 +145,8 @@ grob_er <- create_venn_grob(
 
 grob_inv_flor <- create_venn_grob(
   list(
-    "Forest Inventory" = unique(c(inventory_spp1, inventory_spp2)),
-    "Floristic Inventory" = unique(c(floristic_spp1, floristic_spp2))
+    "Forest inventory" = unique(c(inventory_spp1, inventory_spp2)),
+    "Floristic survey" = unique(c(floristic_spp1, floristic_spp2))
   ),
   is_3way = FALSE
 )
@@ -220,7 +220,7 @@ for (i in seq_along(unique_years_all)) {
 result_all <- data.frame(
   year = unique_years_all,
   cumulative_unique_species = cumulative_unique_counts_all,
-  type = "Floristic Inventory"  # Changed name here
+  type = "Floristic survey"  # Changed name here
 )
 
 # Filter data for non-floristic records
@@ -265,7 +265,7 @@ combined_plot <- ggplot() +
   # First plot: Registers by date (black and blue points)
   geom_point(data = count_other, aes(x = as.Date(Var1), y = Freq, color = "Others"), 
              size = 1, shape = 19, alpha = 0.25) +
-  geom_point(data = count_floristic, aes(x = as.Date(Var1), y = Freq, color = "Floristic Inventory"), 
+  geom_point(data = count_floristic, aes(x = as.Date(Var1), y = Freq, color = "Floristic survey"), 
              size = 1.2, shape = 19) +
   
   # Add the second plot's lines (cumulative richness)
@@ -288,7 +288,7 @@ combined_plot <- ggplot() +
   scale_y_continuous(sec.axis = sec_axis(~.*10, name = "\nCumulative species richness")) +
   
   # Customize color for cumulative richness lines and points
-  scale_color_manual(values = c("Floristic Inventory" = "#6BAED6", "Others" = 'black')) +
+  scale_color_manual(values = c("Floristic survey" = "#6BAED6", "Others" = 'black')) +
   
   # Themes for the plot
   theme_minimal() +
@@ -314,8 +314,6 @@ ggplot2::ggsave(filename = "cumrich.svg",
                 height = 8,
                 width = 10,
                 device = "svg")
-
-
 
 # How much time does it take for floristic inventory register to be identified?
 herb_flor <- herb_data[herb_data$is_floristic %in% TRUE, ]
@@ -414,12 +412,12 @@ a = aggregate(diff ~ family.new,
                                   n = length(x)))
 print(a)
 
-file_path2 <- here::here("data", "derived-data")
+file_path2 <- here::here("outputs")
 file_name5 <- "abund_fam_table.csv"
 write.csv(a, file.path(file_path2, file_name5))
 
 
-# How many species that were posteriorly identified configure new species to
+  # How many species that were posteriorly identified configure new species to
 # floristic inventory?
 post_id_spp <- unique(herb_flor1$scientificNameFull[herb_flor1$taxon.rank %in% c("species",
                                                                              "subspecies",
