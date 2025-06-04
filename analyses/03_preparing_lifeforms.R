@@ -55,7 +55,6 @@ lifeform$cycle <- sapply(strsplit(lifeform$projeto.edited, split = "\\/"), funct
 # This is the sample unit
 lifeform$sample.unit <- sapply(strsplit(lifeform$projeto.edited, split = "\\/"), function(x) x[2])
 lifeform$sample.unit <- gsub("^[a-zA-Z]?([0-9]+)[a-zA-Z]?$", "\\1", lifeform$sample.unit)
-
 # This is the potential source/lifeform column
 lifeform$projeto.edited.new1 <- sapply(strsplit(lifeform$projeto.edited, split = "\\/"), function(x) x[3])
 lifeform$projeto.edited.new1 <- gsub("^(\\S+).*", "\\1", lifeform$projeto.edited.new1)

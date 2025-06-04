@@ -114,11 +114,9 @@ herb <- as.data.frame(herb)
 # Preparing columns dayIdentified, monthIdentfied, yearIdentified
 split_date <- function(x) {
   parts <- unlist(strsplit(x, "/"))
-  
-  # Initialize day, month, and year as NA
+
   day <- month <- year <- NA
-  
-  # Assign values based on the number of parts
+
   if (length(parts) == 3) {
     day <- as.numeric(parts[1])
     month <- as.numeric(parts[2])

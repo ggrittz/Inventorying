@@ -29,19 +29,11 @@ summ_table <- readxl::read_xlsx(file.path(file_path1, file_name6))
 # Pie chart for life forms ------------------------------------------------
 to_pie <- data.frame(table(herb_data$lifeForm[herb_data$is_floristic %in% TRUE]))
 to_pie$Var1 <- as.character(to_pie$Var1)
-
-# Calculate the percentage for each value
 percentages <- round(100 * to_pie$Freq / sum(to_pie$Freq), 2)
-
-# Combine category names with both values and percentages
 labels <- paste(to_pie$Var1, "\n", to_pie$Freq, " (", percentages, "%)", sep = "")
 
-# Define the SVG file name and dimensions
-svg("figures/pie_chart.svg", width = 10, height = 8)  # Adjust the dimensions as needed
-
-# Create the pie chart with both value and percentage labels
+svg("figures/pie_chart.svg", width = 10, height = 8)
 colors <- RColorBrewer::brewer.pal(n = length(to_pie$Var1), name = "Blues")
-
 pie(to_pie$Freq, labels = labels, 
     main = paste0("Growth forms represented in the Floristic survey samples", 
                  "\n", 
@@ -63,9 +55,9 @@ result <- summ_table_filtered %>%
     names_to = "source",
     values_to = "present"
   ) %>%
-  filter(present) %>%  # Keep only rows where present = TRUE
-  mutate(er = gsub(".*_(FOM|FOD|FED)$", "\\1", source)) %>%  # Extract FOM/FOD/FED
-  select(species, er)  # Keep only these two columns
+  filter(present) %>%
+  mutate(er = gsub(".*_(FOM|FOD|FED)$", "\\1", source)) %>%
+  select(species, er)
 result <- result[!duplicated(result), ]
 
 # Split species by their er type
@@ -74,12 +66,12 @@ FOD_spp <- unique(result$species[result$er == "FOD"])
 FED_spp <- unique(result$species[result$er == "FED"])
 
 
-# Custom function to create Venn grobs with your exact parameters
+# Venn grobs
 create_venn_grob <- function(venn_list, is_3way = TRUE) {
   grid.newpage()
   
   if (is_3way) {
-    # Parameters for FOM/FOD/FED Venn (3-way)
+    # FOM/FOD/FED
     venn_grob <- venn.diagram(
       x = venn_list,
       filename = NULL,
@@ -104,7 +96,7 @@ create_venn_grob <- function(venn_list, is_3way = TRUE) {
       fill = c("#BDD7E7", "#6BAED6", "#3182BD")
     )
   } else {
-    # Parameters for Forest/Floristic Venn (2-way)
+    # Forest/Floristic
     venn_grob <- venn.diagram(
       x = venn_list,
       filename = NULL,
@@ -128,12 +120,11 @@ create_venn_grob <- function(venn_list, is_3way = TRUE) {
       fill = c("#BDD7E7", "#6BAED6")
     )
   }
-  
   grid.draw(venn_grob)
   grid.grab()
 }
 
-# Create grobs with your exact parameters
+# Make grobs
 grob_er <- create_venn_grob(
   list(
     "Amf" = FOM_spp,
@@ -168,7 +159,7 @@ ggsave("figures/combined_venn.svg",
 
 # Species increment through Floristic Inventory ---------------------------
 
-# Count the number of samples per year
+# Count the number of registers by year
 count_floristic <- as.data.frame(table(herb_data$eventDate[herb_data$is_floristic %in% TRUE &
                                                              herb_data$taxon.rank %in% c("species",
                                                                                          "subspecies",
@@ -216,11 +207,10 @@ for (i in seq_along(unique_years_all)) {
   cumulative_unique_counts_all[i] <- length(species_up_to_now)
 }
 
-# Create a result data frame for all records
 result_all <- data.frame(
   year = unique_years_all,
   cumulative_unique_species = cumulative_unique_counts_all,
-  type = "Floristic survey"  # Changed name here
+  type = "Floristic survey"
 )
 
 # Filter data for non-floristic records
@@ -237,21 +227,19 @@ to_plot_non_floristic <- to_plot_non_floristic[!is.na(to_plot_non_floristic$even
 unique_years_non_floristic <- unique(to_plot_non_floristic$eventDate)
 cumulative_unique_counts_non_floristic <- numeric(length(unique_years_non_floristic))
 
-# Loop through each year and calculate cumulative unique species for non-floristic records
+# The same as above but for non-floristic records now
 for (i in seq_along(unique_years_non_floristic)) {
   current_year <- unique_years_non_floristic[i]
   species_up_to_now <- unique(to_plot_non_floristic$scientificNameFull[to_plot_non_floristic$eventDate <= current_year])
   cumulative_unique_counts_non_floristic[i] <- length(species_up_to_now)
 }
 
-# Create a result data frame for non-floristic records
 result_non_floristic <- data.frame(
   year = unique_years_non_floristic,
   cumulative_unique_species = cumulative_unique_counts_non_floristic,
-  type = "Others"  # Changed name here
+  type = "Others"
 )
 
-# Combine results into one data frame
 final_result <- rbind(result_all, result_non_floristic)
 
 
@@ -262,35 +250,24 @@ final_result <- rbind(result_all, result_non_floristic)
 # Create combined plot with two y-axes
 combined_plot <- ggplot() +
   
-  # First plot: Registers by date (black and blue points)
+  # Registers by date
   geom_point(data = count_other, aes(x = as.Date(Var1), y = Freq, color = "Others"), 
              size = 1, shape = 19, alpha = 0.25) +
   geom_point(data = count_floristic, aes(x = as.Date(Var1), y = Freq, color = "Floristic survey"), 
              size = 1.2, shape = 19) +
-  
-  # Add the second plot's lines (cumulative richness)
+  # Cumulative richness
   geom_line(data = final_result, aes(x = as.Date(year), 
-                                     y = cumulative_unique_species / 10, 
+                                     y = cumulative_unique_species / 10, # to scale
                                      color = type)) + 
-  # Dividing `cumulative_unique_species` by 10 to scale it for plotting with the first y-axis.
-  
-  # Vertical lines (important dates)
   geom_vline(xintercept = as.Date(c("2007-11-06", "2020-02-20")), 
              color = "darkred", lwd = 0.5, linetype = "dashed") +
-  
-  # Labels and Titles
   labs(x = "\nYear (1943–2024)", 
        y = "N of registers per year\n", 
        color = NULL, 
        title = "N of registers and cumulative species richness per year in FURB Herbarium") +
-  
-  # Second y-axis for cumulative richness, scaled
+  # Scaled second y-axis
   scale_y_continuous(sec.axis = sec_axis(~.*10, name = "\nCumulative species richness")) +
-  
-  # Customize color for cumulative richness lines and points
   scale_color_manual(values = c("Floristic survey" = "#6BAED6", "Others" = 'black')) +
-  
-  # Themes for the plot
   theme_minimal() +
   theme(
     plot.title = element_text(hjust = 0.5),
@@ -321,7 +298,6 @@ herb_flor1 <- herb_flor
 
 # How many registers were not identified yet?
 table(herb_flor$scientificNameStatus) # 2591 at genus- and 432 at family-level: 3,023
-
 
 # Adjusting for some cases...
 herb_flor1$dateIdentified <- ifelse(
@@ -417,12 +393,11 @@ file_name5 <- "abund_fam_table.csv"
 write.csv(a, file.path(file_path2, file_name5))
 
 
-  # How many species that were posteriorly identified configure new species to
+# How many species that were posteriorly identified configure new species to
 # floristic inventory?
 post_id_spp <- unique(herb_flor1$scientificNameFull[herb_flor1$taxon.rank %in% c("species",
                                                                              "subspecies",
                                                                              "variety")])
-
 pre_id_spp <- unique(herb_flor$scientificNameFull[herb_flor$taxon.rank %in% c("species",
                                                                               "subspecies",
                                                                               "variety") &

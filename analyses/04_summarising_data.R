@@ -4,7 +4,7 @@
 # For internals
 devtools::load_all()
 
-# From WorldFlora
+# From World Flora Online
 library(WorldFlora)
 data("vascular.families")
 
@@ -28,7 +28,7 @@ herb_data <- herb_data[herb_data$stateProvince.new %in% "santa catarina", ]
 
 ##### All that has been collected in the Forest Inventory #####
 
-# Define the filter conditions for each taxon rank
+# Define filter conditions for each taxon rank
 filter_conditions_family <- function(family) {
   family %in% "NI"
 }
