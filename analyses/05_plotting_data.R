@@ -61,13 +61,13 @@ result <- summ_table_filtered %>%
 result <- result[!duplicated(result), ]
 
 # Split species by their er type
-FOM_spp <- unique(result$species[result$er == "FOM"])
-FOD_spp <- unique(result$species[result$er == "FOD"])
-FED_spp <- unique(result$species[result$er == "FED"])
+FOM_spp <- unique(result$species[grepl("FOM",result$er)])
+FOD_spp <- unique(result$species[grepl("FOD",result$er)])
+FED_spp <- unique(result$species[grepl("FED",result$er)])
 
 
 # Venn grobs
-create_venn_grob <- function(venn_list, is_3way = TRUE) {
+create_venn_grob <- function(venn_list, is_3way = TRUE, label = NULL) {
   grid.newpage()
   
   if (is_3way) {
@@ -121,17 +121,24 @@ create_venn_grob <- function(venn_list, is_3way = TRUE) {
     )
   }
   grid.draw(venn_grob)
+  
+  # Add (A) or (B) label if specified
+  if (!is.null(label)) {
+    grid.text(label, x = 0.05, y = 0.95, gp = gpar(fontsize = 24, fontface = "bold"))
+  }
+  
   grid.grab()
 }
 
-# Make grobs
+# Make grobs with labels
 grob_er <- create_venn_grob(
   list(
     "Amf" = FOM_spp,
     "SMcf" = FOD_spp,
     "APAf" = FED_spp
   ),
-  is_3way = TRUE
+  is_3way = TRUE,
+  label = "(A)"  # Add label here
 )
 
 grob_inv_flor <- create_venn_grob(
@@ -139,7 +146,8 @@ grob_inv_flor <- create_venn_grob(
     "Forest inventory" = unique(c(inventory_spp1, inventory_spp2)),
     "Floristic survey" = unique(c(floristic_spp1, floristic_spp2))
   ),
-  is_3way = FALSE
+  is_3way = FALSE,
+  label = "(B)"  # Add label here
 )
 
 # Combine side-by-side with labels
@@ -270,18 +278,18 @@ combined_plot <- ggplot() +
   scale_color_manual(values = c("Floristic survey" = "#6BAED6", "Others" = 'black')) +
   theme_minimal() +
   theme(
-    plot.title = element_text(hjust = 0.5),
+    plot.title = element_text(hjust = 0.5, size = 17),
     legend.position = "top",
     legend.justification = "center",
-    legend.text = element_text(size = 13),
+    legend.text = element_text(size = 15),
     panel.grid.major.x = element_blank(),
     panel.grid.minor.x = element_blank(),
-    axis.title.x = element_text(size = 15),
-    axis.title.y = element_text(size = 15),
-    axis.text.x = element_text(size = 13),
-    axis.text.y = element_text(size = 13),
-    axis.title.y.right = element_text(size = 15, angle = 90), # Secondary axis
-    axis.text.y.right = element_text(size = 13)
+    axis.title.x = element_text(size = 17),
+    axis.title.y = element_text(size = 17),
+    axis.text.x = element_text(size = 15),
+    axis.text.y = element_text(size = 15),
+    axis.title.y.right = element_text(size = 17, angle = 90), # Secondary axis
+    axis.text.y.right = element_text(size = 15)
   )
 
 combined_plot
@@ -370,7 +378,7 @@ ggplot(herb_flor2,
   geom_boxplot() +
   coord_flip() + 
   theme_bw(base_size = 14) +
-  labs(x = "\nTop 10 most abundant families", 
+  labs(x = "\nTop 10 most abundant botanical families", 
        y = "\nTime needed to species identification (years)", 
        fill = "Family") +
   scale_fill_manual(values = my_palette) +
