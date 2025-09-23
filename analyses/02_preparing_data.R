@@ -23,6 +23,35 @@ all_data <- list(cycle_one_arb,
                  cycle_two_arb,
                  cycle_two_reg)
 
+# How many individuals in each Cycle and source (reg or inv)?
+# Each tree id is a combination of plot/subplot it was found and tree id number
+# Here, we desconsider multiple stems and dead trees
+# Regeneration component has no dead individual stats
+# Tree component Cycle 1
+length(unique(paste0(cycle_one_arb$plot[cycle_one_arb$status.tree %in% "Viva"],
+                     "_",
+                     cycle_one_arb$subplot[cycle_one_arb$status.tree %in% "Viva"],
+                     "_",
+                     cycle_one_arb$tree[cycle_one_arb$status.tree %in% "Viva"]))) # 99,042
+# Reg component Cycle 1
+length(unique(paste0(cycle_one_reg$plot,
+                     "_",
+                     cycle_one_reg$subunit,
+                     "_",
+                     cycle_one_reg$tree))) # 66,933
+# Tree component Cycle 2
+length(unique(paste0(cycle_two_arb$plot[cycle_two_arb$status.tree %in% "Viva"],
+                     "_",
+                     cycle_two_arb$subplot[cycle_two_arb$status.tree %in% "Viva"],
+                     "_",
+                     cycle_two_arb$tree[cycle_two_arb$status.tree %in% "Viva"]))) # 79,104
+# Reg component Cycle 2
+length(unique(paste0(cycle_two_reg$plot,
+                     "_",
+                     cycle_two_reg$subunit,
+                     "_",
+                     cycle_two_reg$tree))) # 70,938
+
 
 # Overall edits
 
