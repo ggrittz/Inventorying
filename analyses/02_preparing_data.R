@@ -23,10 +23,10 @@ all_data <- list(cycle_one_arb,
                  cycle_two_arb,
                  cycle_two_reg)
 
-# How many individuals in each Cycle and source (reg or inv)?
+# How many individuals were measured in each Cycle and source (reg or inv)?
 # Each tree id is a combination of plot/subplot it was found and tree id number
 # Here, we desconsider multiple stems and dead trees
-# Regeneration component has no dead individual stats
+# Regeneration component has no dead individual status
 # Tree component Cycle 1
 length(unique(paste0(cycle_one_arb$plot[cycle_one_arb$status.tree %in% "Viva"],
                      "_",

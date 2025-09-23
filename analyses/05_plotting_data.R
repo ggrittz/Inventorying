@@ -23,12 +23,14 @@ inventory_spp2 <- readRDS(file.path(file_path, file_name2))
 floristic_spp1 <- readRDS(file.path(file_path, file_name3))
 floristic_spp2 <- readRDS(file.path(file_path, file_name4))
 herb_data <- readRDS(file.path(file_path, file_name5))
-summ_table <- readxl::read_xlsx(file.path(file_path1, file_name6))
+summ_table <- as.data.frame(readxl::read_xlsx(file.path(file_path1, file_name6)))
 
 
 # Pie chart for life forms ------------------------------------------------
 to_pie <- data.frame(table(herb_data$lifeForm[herb_data$is_floristic %in% TRUE]))
 to_pie$Var1 <- as.character(to_pie$Var1)
+# Changing these names to keep it concise with growth forms
+to_pie$Var1 <- c("Climbers", "Epiphytes", "Herbs", "Trees and shrubs")
 percentages <- round(100 * to_pie$Freq / sum(to_pie$Freq), 2)
 labels <- paste(to_pie$Var1, "\n", to_pie$Freq, " (", percentages, "%)", sep = "")
 
@@ -422,4 +424,25 @@ post_id_fam <- unique(herb_flor1$family.new)
 pre_id_fam <- unique(herb_flor$family.new[!(herb_flor$catalogNumber %in% herb_flor1$catalogNumber)])
 length(setdiff(post_id_fam, pre_id_fam)) # 21 families
 rm(list=ls())
+
+
+# New graph requested by reviewer -----------------------------------------
+# Get all unique spp that occur in 
+all_inv <- unique(c(inventory_spp1, inventory_spp2))
+all_flor <- unique(c(floristic_spp1, floristic_spp2))
+
+# Get family, genus, and higher group here
+all_inv <- summ_table[summ_table$species %in% all_inv, c("species", "genus",
+                                                         "family", "Group")]
+all_inv$method <- "inv"
+all_flor <- summ_table[summ_table$species %in% all_flor, c("species", "genus",
+                                                           "family", "Group")]
+all_flor$method <- "flor"
+
+all_both <- dplyr::bind_rows(all_inv, all_flor)
+
+ggplot(all_both, aes(x = factor(method), y = genus, fill = method, colour = genus)) + 
+  geom_bar(stat = "identity", position = "dodge")
+
+
 
