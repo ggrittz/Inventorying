@@ -396,6 +396,15 @@ a = aggregate(diff ~ family.new,
                                   sd = round(sd(x), 2),
                                   max = round(max(x), 2),
                                   n = length(x)))
+
+# Global values
+aggregate(diff ~ 1,
+          data = herb_flor2,
+          FUN = function(x) c(mean = round(mean(x), 2), 
+                              sd = round(sd(x), 2),
+                              max = round(max(x), 2),
+                              n = length(x)))
+
 print(a)
 
 file_path2 <- here::here("outputs")
