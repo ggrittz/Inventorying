@@ -43,20 +43,23 @@ website](https://en.floresta.sc.gov.br/).
 
 ### Workflow
 
-Codes are structured as follows:
+Below is a summary of the manuscript workflow to process all data and
+perform all analyses. Codes are thoroughly documented via comments
+inside them. The workflow structure is as follows:
 
 1.  **Downloading data**: the script `01_downloading_data.R` gets FURB
-    herbarium occurrences from JBRJ IPT as a DarwinCore sheet. FURB
-    herbarium data from JABOT, however, needs to be manually downloaded.
-    Instructions are commented in the script. <br /> <br />
+    herbarium occurrence records from [JBRJ
+    IPT](https://ipt.jbrj.gov.br/jabot/resource?r=furb) in a DarwinCore
+    format. FURB herbarium occurrence records from JABOT, however, need
+    to be manually downloaded. Download instructions are inside the
+    script. <br /> <br />
 2.  **Preparing data**: the script `02_preparing_data.R` loads, edits,
-    cleans, and saves the data from both the forest and floristic
-    inventory of the FlorestaSC project. Script
-    `03_preparing_lifeforms.R` extracts the register life form from a
-    field called *projeto* in the JABOT spreadsheet. This is not a DwC
-    standardized field, so it cannot be extracted directly from JBRJ
-    IPT. See **Downloading data**. All steps for both scripts are
-    thoroughly described within them, as comments. <br /> <br />
+    standardizes, cleans, and saves the data from both the forest
+    inventory and floristic surveys of the FlorestaSC. These processes
+    rely heavily on the `plantR` package (Lima et al., 2021). The script
+    `03_preparing_lifeforms.R` extracts the registered growth form for
+    each record from a field called *projeto* in the JABOT spreadsheet.
+    <br /> <br />
 3.  **Summarizing data**: the script `04_summarizing_data.R` loads the
     previously saved data and performs all types of operations to sum up
     our results. <br /> <br />
@@ -72,3 +75,11 @@ Please cite this GiHub as:
 > **{{ ADD A CITATION }}**
 
 <br />
+
+### References
+
+> Lima, R. A. F., Sánchez-Tapia, A., Mortara, S. R., ter Steege, H.,
+> & de Siqueira, M. F. (2023). plantR: An R package and workflow for
+> managing species records from biological collections. *Methods in
+> Ecology and
+> Evolution*, 14, 332–339. <https://doi.org/10.1111/2041-210X.13779>
