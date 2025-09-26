@@ -37,8 +37,9 @@ website](https://en.floresta.sc.gov.br/).
 
 <br />
 
-[![](Floresta1-cropped.svg){width="698"
-height="288"}](https://en.floresta.sc.gov.br/)
+![](Floresta1-cropped.svg){width="698" height="288"}
+
+<br />
 
 ### Workflow
 

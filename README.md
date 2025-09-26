@@ -15,16 +15,18 @@
 This is the Research Compendium of **FlorestaSC: A double-up approach to
 improve biodiversity monitoring in hyperdiverse forests**. It contains
 the necessary codes to reproduce all analyses and plot images in the
-article. Scripts are numerically ordered, that is, the workflow starts
-with `01_downloading_data.R` and ends with `06_base_map.R`. There is a
-single internal function, `99_summInv.R`, that is loaded with
+article. Scripts are numerically ordered, meaning that the workflow
+starts with `01_downloading_data.R` and ends with `06_base_map.R`. There
+is a single internal function, `99_summInv.R`, that is loaded with
 `devtools::load_all()` to summarise forest inventory data by vegetation
-type.
+type. For more information about FlorestaSC, [take a look at our
+website](https://en.floresta.sc.gov.br/).
 
 <br />
 
-[<img src="Floresta1-cropped.svg" width="698" height="288"
-alt="For more information about the project, click on the image!" />](https://en.floresta.sc.gov.br/)
+<img src="Floresta1-cropped.svg" width="698" height="288" />
+
+<br />
 
 ### Workflow
 
