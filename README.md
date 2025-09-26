@@ -24,7 +24,11 @@ website](https://en.floresta.sc.gov.br/).
 
 <br />
 
+<center>
+
 ![](logos.svg)
+
+</center>
 
 <br />
 
