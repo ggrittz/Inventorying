@@ -23,6 +23,9 @@ type.
 
 <br />
 
+[<img src="Floresta1-cropped.svg" width="698" height="288"
+alt="For more information about the project, click on the image!" />](https://en.floresta.sc.gov.br/)
+
 ### Workflow
 
 Codes are structured as follows:
