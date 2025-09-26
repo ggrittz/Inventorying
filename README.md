@@ -24,7 +24,7 @@ website](https://en.floresta.sc.gov.br/).
 
 <br />
 
-<img src="Floresta1-cropped.svg" width="698" height="288" />
+![](logos.svg)
 
 <br />
 
