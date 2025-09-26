@@ -14,7 +14,7 @@ knitr::opts_chunk$set(collapse  = TRUE,
                       out.width = "100%")
 ```
 
-# Repository for XXX Inventorying paper
+# Repository for FlorestaSC: A double-up approach to improve biodiversity monitoring in hyperdiverse forests Inventorying paper
 
 <!-- badges: start -->
 
@@ -25,7 +25,8 @@ knitr::opts_chunk$set(collapse  = TRUE,
 
 ### Description
 
-This is the Research Compendium of **XXX Inventorying XXX**. It contains
+This is the Research Compendium of **FlorestaSC: A double-up approach to
+improve biodiversity monitoring in hyperdiverse forests**. It contains
 the necessary codes to reproduce all analyses and plot images in the
 article. Scripts are numerically ordered, that is, the workflow starts
 with `01_downloading_data.R` and ends with `05_plotting_data.R`. There
@@ -44,19 +45,18 @@ Codes are structured as follows:
     herbarium data from JABOT, however, needs to be manually downloaded.
     Instructions are commented in the script. <br /> <br />
 2.  **Preparing data**: the script `02_preparing_data.R` loads, edits,
-    and cleans, and saves the data from both the forest and floristic
+    cleans, and saves the data from both the forest and floristic
     inventory of FlorestaSC project. Script `03_preparing_lifeforms.R`
     extracts the register life form from a field called *projeto* in the
     JABOT spreadsheet. This is not a DwC standardized field, so it
     cannot be extracted directly from JBRJ IPT. See **Downloading
     data**. All steps for both scripts are thoroughly described within
-    it, as comments. <br /> <br />
+    them, as comments. <br /> <br />
 3.  **Summarizing data**: the script `04_summarizing_data.R` loads the
     previously saved data and performs all types of operations to sum up
     our results. <br /> <br />
 4.  **Plotting data**: finally, the script `05_plotting_data.R` creates
-    all the plots shown in the main article, plus a few extra
-    summarizations.
+    all the plots shown in the main article.
 
 <br />
 
@@ -67,5 +67,3 @@ Please cite this GiHub as:
 > **{{ ADD A CITATION }}**
 
 <br />
-
-### References
