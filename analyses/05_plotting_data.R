@@ -34,7 +34,8 @@ to_pie$Var1 <- c("Climbers", "Epiphytes", "Herbs", "Trees and shrubs")
 percentages <- round(100 * to_pie$Freq / sum(to_pie$Freq), 2)
 labels <- paste(to_pie$Var1, "\n", to_pie$Freq, " (", percentages, "%)", sep = "")
 
-svg("figures/pie_chart.svg", width = 10, height = 8)
+# svg("figures/pie_chart.svg", width = 10, height = 8)
+pdf("figures/pie_chart.pdf", width = 10, height = 8)
 colors <- RColorBrewer::brewer.pal(n = length(to_pie$Var1), name = "Blues")
 pie(to_pie$Freq, labels = labels, 
     main = paste0("Growth forms represented in the Floristic survey samples", 
@@ -160,7 +161,7 @@ combined <- grid.arrange(
 )
 
 # Save
-ggsave("figures/combined_venn.svg", 
+ggsave("figures/combined_venn.pdf", 
        combined, 
        width = 20, 
        height = 10, 
@@ -295,12 +296,12 @@ combined_plot <- ggplot() +
   )
 
 combined_plot
-ggplot2::ggsave(filename = "cumrich.svg",
+ggplot2::ggsave(filename = "cumrich.pdf",
                 plot = combined_plot,
                 path = here::here("figures"),
                 height = 8,
                 width = 10,
-                device = "svg")
+                device = "pdf")
 
 # How much time does it take for floristic inventory register to be identified?
 herb_flor <- herb_data[herb_data$is_floristic %in% TRUE, ]
@@ -386,7 +387,7 @@ ggplot(herb_flor2,
   scale_fill_manual(values = my_palette) +
   guides(fill = 'none')
 
-ggsave(filename = "id_time.svg", device = "svg", path = here::here("figures"),
+ggsave(filename = "id_time.pdf", device = "pdf", path = here::here("figures"),
        width = 8, height = 6)
 
 #Values

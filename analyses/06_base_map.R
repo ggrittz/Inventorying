@@ -53,7 +53,9 @@ br_ar_bbox <- terra::crop(br_ar, (bbox_sc * 1.1))
 
 
 ##### Plotting #####
-svg("figures/map.svg", width = 10, height = 12)
+# svg("figures/map.svg", width = 10, height = 12)
+# As pdf
+pdf("figures/map.pdf", width = 10, height = 12)
 # Base map
 terra::plot(br_ar_bbox, col = "lightgrey", border = "black",
             xlab = "Longitude", ylab = "Latitude\n", cex.lab = 1.5,
